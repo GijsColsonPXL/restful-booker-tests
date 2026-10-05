@@ -1,0 +1,31 @@
+name: API tests (Newman)
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  newman:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Newman installeren
+        run: npm install -g newman newman-reporter-htmlextra
+
+      - name: Collection uitvoeren
+        run: |
+          newman run restful-booker.postman_collection.json \
+            -e restful-booker.postman_environment.json \
+            -r cli,htmlextra --reporter-htmlextra-export newman-report.html
+
+      - name: Rapport bewaren
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-report
+          path: newman-report.html
